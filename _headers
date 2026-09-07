@@ -1,0 +1,24 @@
+/*
+  sw.js 必须无缓存，否则新版本无法推送
+  HTML 不缓存，保证拿到最新版
+*/
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# JS/CSS 设短缓存，文件名带 hash 时可改长缓存
+/*.js
+  Cache-Control: public, max-age=3600
+/*.css
+  Cache-Control: public, max-age=3600
+
+# 图标可长缓存
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
