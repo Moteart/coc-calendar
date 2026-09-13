@@ -437,7 +437,7 @@ input,select,textarea{ outline:none; }
 }
 @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
 
-.cal-events{ display:flex; flex-direction:column; gap:3px; overflow:hidden; min-height:0; align-items:flex-end; }
+.cal-events{ display:flex; flex-direction:column; gap:3px; overflow:hidden; min-height:0; align-items:flex-start; }
 .cal-ev{
   display:flex; align-items:center; gap:5px;
   padding:2px 6px 2px 5px; border-radius:4px;
