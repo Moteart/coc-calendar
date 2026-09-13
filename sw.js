@@ -5,7 +5,7 @@
    - 以 registration.scope 推导 BASE，把请求路径归一化为站内相对路径再匹配
    - 所有网络请求 cache:'no-cache'，绕开浏览器 HTTP 短缓存，保证更新即时可达 */
 
-const CACHE_NAME = 'coc-calendar-v7';
+const CACHE_NAME = 'coc-calendar-v8';
 const BASE = new URL(self.registration.scope).pathname.replace(/\/$/, '');
 const NET_FIRST = [
   '/', '/index.html', '/css/style.css', '/manifest.json',
