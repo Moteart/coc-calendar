@@ -111,11 +111,6 @@ window.Calendar = (function () {
       head += '<span class="' + (w === 0 || w === 6 ? 'is-weekend' : '') + '">周' + S.wdCn(w) + '</span>';
     }
 
-    var cells = '';
-    for (var k = 0; k < gridDays; k++) {
-      cells += cellHtml(S.addDays(gridStart, k), first, today, filtered, rowDepth);
-    }
-
     /* 生成长条层叠布局：同一条周线上的长条按列区间避让分层，杜绝互相遮挡 */
     /* 按起始时间降序处理（跨周尾段视为 0 点最早），较早的长条分到较高层（显示在上方） */
     spanningList.sort(function (a, b) {
@@ -136,6 +131,12 @@ window.Calendar = (function () {
     spanningList.forEach(function (s) {
       rowDepth[s.row] = Math.max(rowDepth[s.row] || 0, s.layer + 1);
     });
+
+    var cells = '';
+    for (var k = 0; k < gridDays; k++) {
+      cells += cellHtml(S.addDays(gridStart, k), first, today, filtered, rowDepth);
+    }
+
     var spanningHtml = spanningList.map(function (s) {
       var it = s.inst;
       var timeLabel = fmtInstTime(it);
