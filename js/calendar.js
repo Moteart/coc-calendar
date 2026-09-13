@@ -111,18 +111,21 @@ window.Calendar = (function () {
       head += '<span class="' + (w === 0 || w === 6 ? 'is-weekend' : '') + '">周' + S.wdCn(w) + '</span>';
     }
 
-    /* 生成长条层叠布局：同一条周线内的长条按起始时间紧凑堆叠（无视列重叠） */
-    /* 跨周尾段视为 0 点最早；按时间降序使早的开始在更上层（视觉上 = 更靠近 daynum） */
+    /* 生成长条层叠布局：同一条周线上的长条按列区间避让分层，杜绝互相遮挡 */
+    /* 按起始时间降序处理（跨周尾段视为 0 点最早），较早的长条分到较高层（显示在上方） */
     spanningList.sort(function (a, b) {
-      var ta = a.isTail ? -1 : S.timeToMin(a.inst.time || '99:99');
-      var tb = b.isTail ? -1 : S.timeToMin(b.inst.time || '99:99');
+      var ta = a.isTail ? 0 : S.timeToMin(a.inst.time || '99:99');
+      var tb = b.isTail ? 0 : S.timeToMin(b.inst.time || '99:99');
       return tb - ta;
     });
     var rowLayers = {};
     spanningList.forEach(function (s) {
+      var c1 = s.col, c2 = s.col + s.span - 1;
       var arr = rowLayers[s.row] = rowLayers[s.row] || [];
-      s.layer = arr.length;
-      arr.push({ layer: s.layer });
+      var layer = 0;
+      while (arr.some(function (o) { return o.layer === layer && c1 <= o.c2 && o.c1 <= c2; })) layer++;
+      arr.push({ layer: layer, c1: c1, c2: c2 });
+      s.layer = layer;
     });
     var rowDepth = {};
     spanningList.forEach(function (s) {
