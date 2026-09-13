@@ -1,7 +1,7 @@
-﻿/* Service Worker (auto-deploy test marker) - 离线缓存
+/* Service Worker - 离线缓存
    核心 HTML/JS/CSS/manifest 走 network-first（防止旧版 JS 误覆盖新数据）；
    图标等稳定资源走 cache-first + 后台更新。 */
-const CACHE_NAME = 'coc-calendar-v5';
+const CACHE_NAME = 'coc-calendar-v6';
 const NET_FIRST = [
   '/', '/index.html', '/css/style.css', '/manifest.json',
   '/js/idb.js', '/js/store.js', '/js/ui.js', '/js/schedule.js',

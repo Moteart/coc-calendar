@@ -400,8 +400,9 @@ input,select,textarea{ outline:none; }
 
 .cal-grid{
   display:grid; grid-template-columns:repeat(7,1fr);
-  grid-auto-rows:minmax(108px,1fr);
+  grid-auto-rows:minmax(108px,auto);
   position:relative;
+  --ev-pitch:25px;
 }
 .cal-cell{
   border-right:1px solid var(--line); border-bottom:1px solid var(--line);
@@ -472,9 +473,11 @@ input,select,textarea{ outline:none; }
 .cal-ev-more:hover{ color:var(--ink); background:var(--sunk-2); }
 
 /* 跨午夜 spanning：作为 .cal-grid 直接子元素，用 grid-column 跨列 */
+/* --stack 为层号：同周行内列区间重叠的长条按层错开，避免互相遮挡 */
 .cal-ev.is-spanning{
   align-self:end;
-  margin:0 6px 3px;
+  margin-left:6px; margin-right:6px;
+  margin-bottom:calc(3px + var(--stack,0) * var(--ev-pitch,25px));
   z-index:4;
   pointer-events:auto;
 }

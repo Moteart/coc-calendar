@@ -113,25 +113,37 @@ window.Calendar = (function () {
 
     var cells = '';
     for (var k = 0; k < gridDays; k++) {
-      cells += cellHtml(S.addDays(gridStart, k), first, today, filtered);
+      cells += cellHtml(S.addDays(gridStart, k), first, today, filtered, rowDepth);
     }
 
-    /* 生成 spanning HTML：定位到 cal-grid 的正确 grid-column / grid-row */
-    /* 按 inst 的起始时间排序，决定在同一行内的垂直排列顺序 */
+    /* 生成长条层叠布局：同一条周线上的长条按列区间避让分层，杜绝互相遮挡 */
+    /* 按起始时间降序处理（跨周尾段视为 0 点最早），较早的长条分到较高层（显示在上方） */
     spanningList.sort(function (a, b) {
-      var ta = S.timeToMin(a.inst.time || '99:99');
-      var tb = S.timeToMin(b.inst.time || '99:99');
-      return ta - tb;
+      var ta = a.isTail ? 0 : S.timeToMin(a.inst.time || '99:99');
+      var tb = b.isTail ? 0 : S.timeToMin(b.inst.time || '99:99');
+      return tb - ta;
+    });
+    var rowLayers = {};
+    spanningList.forEach(function (s) {
+      var c1 = s.col, c2 = s.col + s.span - 1;
+      var arr = rowLayers[s.row] = rowLayers[s.row] || [];
+      var layer = 0;
+      while (arr.some(function (o) { return o.layer === layer && c1 <= o.c2 && o.c1 <= c2; })) layer++;
+      arr.push({ layer: layer, c1: c1, c2: c2 });
+      s.layer = layer;
+    });
+    var rowDepth = {};
+    spanningList.forEach(function (s) {
+      rowDepth[s.row] = Math.max(rowDepth[s.row] || 0, s.layer + 1);
     });
     var spanningHtml = spanningList.map(function (s) {
       var it = s.inst;
       var timeLabel = fmtInstTime(it);
-      var order = S.timeToMin(it.time || '99:99');
       var cls = 'cal-ev is-spanning' +
         (it.status === 'done' ? ' is-done' : it.status === 'cancelled' ? ' is-cancel' : '') +
         (it.satellite ? ' is-satellite' : '') +
         (s.isPart ? ' is-part' : '') + (s.isTail ? ' is-tail' : '');
-      return '<div class="' + cls + '" style="--ev-color:' + esc(it.module.color) + ';grid-column:' + s.col + '/span ' + s.span + ';grid-row:' + s.row + ';order:' + order + '" data-ev="' + esc(it.key) + '" title="' +
+      return '<div class="' + cls + '" style="--ev-color:' + esc(it.module.color) + ';--stack:' + s.layer + ';grid-column:' + s.col + '/span ' + s.span + ';grid-row:' + s.row + '" data-ev="' + esc(it.key) + '" title="' +
         esc(it.module.name + ' · ' + timeLabel + ' · ' + S.fmtDur(it.duration) + (it.note ? '\n' + it.note : '')) + '">' +
         '<span class="cal-ev-time">' + esc(timeLabel) + '</span>' +
         '<span class="cal-ev-name">' + esc(it.module.name) + '</span>' +
@@ -167,7 +179,7 @@ window.Calendar = (function () {
     bind();
   }
 
-  function cellHtml(date, monthFirst, today, byDate) {
+  function cellHtml(date, monthFirst, today, byDate, rowDepth) {
     var d = S.parse(date);
     var w = d.getDay();
     var out = date < monthFirst || date > S.monthEnd(monthFirst);
@@ -184,13 +196,17 @@ window.Calendar = (function () {
     var cellCol = (cellIdx % 7) + 1;
     var gridStyle = 'grid-column:' + cellCol + ';grid-row:' + cellRow;
 
+    /* 该周行有跨午夜长条时，为长条堆叠区预留底部空间，避免遮挡格内条目 */
+    var zone = (rowDepth && rowDepth[cellRow]) || 0;
+    if (zone) gridStyle += ';padding-bottom:calc(5px + ' + zone + '*var(--ev-pitch,25px))';
+
     var num = '<div class="cal-daynum">' + d.getDate() +
       (isToday ? '<span class="badge-today">今天</span><i class="mark-now"></i>' : '') +
       '</div>';
 
+    /* 展示当天全部条目（行高自动增长，不再截断） */
     var evs = '<div class="cal-events">';
-    var max = 3;
-    list.slice(0, max).forEach(function (it) {
+    list.forEach(function (it) {
       var timeLabel = fmtInstTime(it);
       evs += '<div class="cal-ev' +
         (it.status === 'done' ? ' is-done' : it.status === 'cancelled' ? ' is-cancel' : '') +
@@ -202,9 +218,6 @@ window.Calendar = (function () {
         '<span class="cal-ev-dur">' + esc(S.fmtDur(it.duration)) + '</span>' +
         '</div>';
     });
-    if (list.length > max) {
-      evs += '<div class="cal-ev-more" data-more="' + esc(date) + '">+' + (list.length - max) + ' 项</div>';
-    }
     evs += '</div>';
 
     return '<div class="' + cls + '" style="' + gridStyle + '" data-date="' + esc(date) + '">' +
