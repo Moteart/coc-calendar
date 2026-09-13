@@ -141,11 +141,7 @@ window.Calendar = (function () {
         (it.status === 'done' ? ' is-done' : it.status === 'cancelled' ? ' is-cancel' : '') +
         (it.satellite ? ' is-satellite' : '') +
         (s.isPart ? ' is-part' : '') + (s.isTail ? ' is-tail' : '');
-      /* 让长条起始位置避让起始列 cell 内的单日条目 */
-      var startDate = S.addDays(gridStart, s.startIdx);
-      var overlapCount = (filtered[startDate] || []).length;
-      var barMarginTop = 20 + overlapCount * 25 + s.layer * 25;
-      return '<div class="' + cls + '" style="--ev-color:' + esc(it.module.color) + ';--stack:' + s.layer + ';grid-column:' + s.col + '/span ' + s.span + ';grid-row:' + s.row + ';margin-top:' + barMarginTop + 'px" data-ev="' + esc(it.key) + '" title="' +
+      return '<div class="' + cls + '" style="--ev-color:' + esc(it.module.color) + ';--stack:' + s.layer + ';grid-column:' + s.col + '/span ' + s.span + ';grid-row:' + s.row + '" data-ev="' + esc(it.key) + '" title="' +
         esc(it.module.name + ' · ' + timeLabel + ' · ' + S.fmtDur(it.duration) + (it.note ? '\n' + it.note : '')) + '">' +
         '<span class="cal-ev-time">' + esc(timeLabel) + '</span>' +
         '<span class="cal-ev-name">' + esc(it.module.name) + '</span>' +
