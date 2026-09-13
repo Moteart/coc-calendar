@@ -475,9 +475,9 @@ input,select,textarea{ outline:none; }
 /* 跨午夜 spanning：作为 .cal-grid 直接子元素，用 grid-column 跨列 */
 /* --stack 为层号：同周行内列区间重叠的长条按层错开，避免互相遮挡 */
 .cal-ev.is-spanning{
-  align-self:end;
+  align-self:start;
+  margin-top:calc(20px + var(--stack,0) * 25px);
   margin-left:6px; margin-right:6px;
-  margin-bottom:calc(3px + var(--stack,0) * var(--ev-pitch,25px));
   z-index:4;
   pointer-events:auto;
 }
